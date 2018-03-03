@@ -15,7 +15,7 @@ class App extends Component {
 		var res = [];
 		var i = 0;
 		while(i < deals.length){
-			res[i] = <li><a href={this.resto[i].urlFourchette}>{this.resto[i].name}</a></li>;
+			res[i] = <li><a href={this.resto[i].urlFourchette}>{this.resto[i].name} - {this.resto[i].addresse} {this.resto[i].cp}</a></li>;
 			i++;
 			
 		}	
