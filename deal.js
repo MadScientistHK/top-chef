@@ -56,7 +56,7 @@ const getIdFrom = async resto =>
     }
 }
 
-//get the offers of a restaurant with his id (return null if id is null)
+//get the offers of a restaurant with his id
 const getOffersFrom = async id =>
 {
     if(id != null)
@@ -72,12 +72,11 @@ const getOffersFrom = async id =>
     }
 }
 
-//function to create a restaurant whith the lafourchette features given a michelin restaurant
+//function to create a restaurant with the lafourchette features given a michelin restaurant
 const LaFourchetteResto = async MichelinResto =>
 {
     const id = await getIdFrom(MichelinResto);
     const offers = await getOffersFrom(id);
-
     return Object.assign(MichelinResto,
     {
         id: id,
@@ -86,9 +85,6 @@ const LaFourchetteResto = async MichelinResto =>
     });
 }
 
-//get all the lafouchette data about restaurants from a json file, 
-//and return an array of restaurants with lafourchette features beside the michelin features already here.
-//if a restaurant is not in the lafourchette data base or if it doesn't have any offer : it won't be on the list
 const getLafourchetteData = async path =>
 {
     console.log("reading data from " + path + " ...");
@@ -101,30 +97,22 @@ const getLafourchetteData = async path =>
     while (index < michelinRestoArr.length)
     {
         const promiseLafourchette = [];
-
-        //launch 10 queries
-        let nbrQueries = 35;
-
+        let nbrQueries = 50;
         if(michelinRestoArr.length - index + 1 < nbrQueries) nbrQueries = michelinRestoArr.length - index;
-
         for(let i = 0; i < nbrQueries; i++)
         {
             promiseLafourchette.push(LaFourchetteResto(michelinRestoArr[index]));
             index ++;
         }
-        
         console.log("queries : " + index);
-
         //resolve queries
         const lafourchetteRestoArr10 = await Promise.all(promiseLafourchette);
-        console.log("last " + nbrQueries + " queries are resolved\n");
-        //add their result
         lafourchetteRestoArr = lafourchetteRestoArr.concat(lafourchetteRestoArr10);
     }
      
 
     console.log("filter to keep the revelant restaurants")
-    const finalList = lafourchetteRestoArr.filter(r => r.offers !== null).filter(r => r.offers.length != 0);
+    const finalList = lafourchetteRestoArr.filter(r => r.offers != null).filter(r => r.offers.length != 0);
 
     console.log(michelinRestoArr.length + " restaurants have been process, " + finalList.length + " have been keep");
     console.clear();
@@ -132,12 +120,12 @@ const getLafourchetteData = async path =>
     console.log("list of restaurants with deals :");
     finalList.map(r => console.log(r.name));
     console.log("------ Success ------");
+	const jsonObj = finalList.map(r => JSON.stringify(r, null, 4));
+	const contentForFile = "[\n" + jsonObj.join(",\n") + "\n]";
+	console.log("saving to file");
+	fs.appendFileSync('./work/deals.json', '');
+	fs.writeFileSync('./work/deals.json', contentForFile, "utf-8");
     return finalList;
 }
 
-getLafourchetteData("./work/restaurant.json");
-
-
-module.exports = {
-    getResto: getLafourchetteData
-}
+getLafourchetteData('./work/restaurant.json');

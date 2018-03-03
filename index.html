@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+
+    <script src="https://fb.me/react-15.2.0.js"></script>
+    <script src="https://fb.me/react-dom-15.2.0.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+
+    <link rel="stylesheet" href="style.css">
+
+    <title>Deal from laFourchette</title>
+  </head>
+  <body>
+
+    <div id = "offersDisplay">
+    </div>
+
+   <script type = "text/babel">
+
+    const httpGet = theUrl =>{
+
+      var xmlHttp = new XMLHttpRequest();
+      xmlHttp.open("GET", theUrl, false);
+      xmlHttp.send( null );
+      return xmlHttp.responseText;
+    }
+
+    class Resto extends React.Component{
+      constructor(){
+          super();
+          this.resto = restoList[nbrResto];
+          nbrResto++;
+      }
+
+      render(){
+          return(
+          <div className = "restoDiv">
+              <h2>{this.resto.name}</h2>
+              <h3>{this.resto.cp}</h3>
+              <a href = {'' + this.resto.urlFourchette}>
+                there is {this.resto.offers.length} offer(s)
+              </a>
+          </div>
+          );
+      }
+    }
+
+    class ListOfResto extends React.Component{
+      constructor(){
+          super();
+          this.list = restoList;
+      }
+      render(){
+          let arr = [];
+          this.list.map(r => arr.push(<Restaurant/>));
+          return(
+          <div>{arr}</div>
+          );
+      }
+    
+}
+   </script> 
+  </body>
+</html>
