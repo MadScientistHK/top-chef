@@ -105,7 +105,6 @@ const getLafourchetteData = async path =>
             index ++;
         }
         console.log("queries : " + index);
-        //resolve queries
         const lafourchetteRestoArr10 = await Promise.all(promiseLafourchette);
         lafourchetteRestoArr = lafourchetteRestoArr.concat(lafourchetteRestoArr10);
     }
@@ -123,9 +122,9 @@ const getLafourchetteData = async path =>
 	const jsonObj = finalList.map(r => JSON.stringify(r, null, 4));
 	const contentForFile = "[\n" + jsonObj.join(",\n") + "\n]";
 	console.log("saving to file");
-	fs.appendFileSync('./work/deals.json', '');
-	fs.writeFileSync('./work/deals.json', contentForFile, "utf-8");
+	fs.appendFileSync('./app/src/deals.json', '');
+	fs.writeFileSync('./app/src/deals.json', contentForFile, "utf-8");
     return finalList;
 }
 
-getLafourchetteData('./work/restaurant.json');
+getLafourchetteData('./restaurant.json');

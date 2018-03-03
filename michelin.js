@@ -132,8 +132,8 @@ async function scrap()
   const jsonObj = restoArray.map(resto => JSON.stringify(resto, null, 4));
   const contentForFile = "[\n" + jsonObj.join(",\n") + "\n]";
   console.log("saving to file");
-  fs.appendFileSync('./work/restaurant.json', '');
-  fs.writeFileSync('./work/restaurant.json', contentForFile, "utf-8");
+  fs.appendFileSync('./restaurant.json', '');
+  fs.writeFileSync('./restaurant.json', contentForFile, "utf-8");
   console.log(restoArray.length.toString() + " restaurants found");
   console.log("-----Scrap complete-----");
 }

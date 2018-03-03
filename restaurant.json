@@ -185,6 +185,11 @@
     "cp": "51430"
 },
 {
+    "name": "La Bastide de Moustiers",
+    "addresse": "Parc naturel régional du Verdon, Chemin de Quinson",
+    "cp": "04360"
+},
+{
     "name": "Hostellerie Bérard",
     "addresse": "Avenue Gabriel-Péri",
     "cp": "83740"
@@ -273,11 +278,6 @@
     "name": "Château de Pray",
     "addresse": "Rue du Cèdre",
     "cp": "37400"
-},
-{
-    "name": "La Bastide de Moustiers",
-    "addresse": "Parc naturel régional du Verdon, Chemin de Quinson",
-    "cp": "04360"
 },
 {
     "name": "Il Carpaccio",
@@ -1175,14 +1175,14 @@
     "cp": "75016"
 },
 {
-    "name": "L'Atelier de Gaztelur",
-    "addresse": "Chemin de Gastelhur",
-    "cp": "64200"
-},
-{
     "name": "La Bastide St-Antoine",
     "addresse": "48 av. Henri-Dunant",
     "cp": "06130"
+},
+{
+    "name": "L'Atelier de Gaztelur",
+    "addresse": "Chemin de Gastelhur",
+    "cp": "64200"
 },
 {
     "name": "Ed.Em",
