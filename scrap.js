@@ -1,34 +1,14 @@
-const cheerio = require("cheerio")
-    , req = require("tinyreq")
-    ;
+const cheerio = require('cheerio');
+const fetch = require('node-fetch');
+const fs = require('fs');
 
-// Define the scrape function
-function scrape(url, data, cb) {
-    // 1. Create the request
-    req(url, (err, body) => {
-        if (err) { return cb(err); }
-
-        // 2. Parse the HTML
-        let $ = cheerio.load(body)
-          , pageData = {}
-          ;
-
-        // 3. Extract the data
-        Object.keys(data).forEach(k => {
-            pageData[k] = $(data[k]).text();
-        });
-
-        // Send the data in the callback
-        cb(null, pageData);
-    });
+// parameters to fetch the url
+const fetchParameters = { method: 'GET',
+headers: {},
+follow: 20,
+timeout: 10000,
+compress: true,
+size: 0,
+body: null,
+agent: null
 }
-
-// Extract some data from my website
-scrape("https://restaurant.michelin.fr/restaurants/france/restaurants-1-etoile-michelin/restaurants-2-etoiles-michelin/restaurants-3-etoiles-michelin", {
-    // Get the website title (from the top header)
-    title: ".header h1"
-    // ...and the description
-  , description: ".header h2"
-}, (err, data) => {
-    console.log(err || data);
-});
