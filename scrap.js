@@ -2,6 +2,9 @@ const cheerio = require('cheerio');
 const fetch = require('node-fetch');
 const fs = require('fs');
 
+const baseUrl = "https://restaurant.michelin.fr/restaurants/france/restaurants-1-etoile-michelin/restaurants-2-etoiles-michelin/restaurants-3-etoiles-michelin/";
+const nbrPages = 35;
+
 // parameters url
 const fetchParameters = { method: 'GET',
 headers: {},
