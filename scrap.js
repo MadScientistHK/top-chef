@@ -17,7 +17,7 @@ agent: null
 }
 
 //get links of each resaurants
-async function getRestaurantLinksFrom(url)
+async function getRestoLinksFrom(url)
 {
   const resp = await fetch(url, fetchParameters);
   const html = await resp.text();
@@ -34,7 +34,7 @@ async function getRestaurantLinksFrom(url)
 }
 
 //get info of a restaurant and convert in an object
-async function getResaurantFrom(url)
+async function getRestoFrom(url)
 {
   const Resto = (name, addresse, cp) => {
     return {
@@ -90,7 +90,7 @@ async function getResaurantFrom(url)
       }
       isTimeout = false;
 
-      return Restaurant(name, address, cp);
+      return Resto(name, address, cp);
     }
     catch(e)
     {
@@ -108,3 +108,34 @@ async function getResaurantFrom(url)
   }
   
 }
+
+async function scrap()
+{
+  console.log("get the url");
+  const promiseUrls = [];
+  for(let i = 1; i<= nbrPages; i++)
+  {
+    const url = baseUrl + "page-" + i.toString();
+    promiseUrls.push(getRestoLinksFrom(url));
+  }
+  const restoLinksArrays = await Promise.all(promiseUrls);
+  const restoLinks = restoLinksArrays
+    .filter(arr => arr != undefined && arr != [])
+      .reduce((accumulator, currentArray) => accumulator.concat(currentArray), []);
+  console.log("get the data")
+  const promiseResto = restoLinks.map(link => getRestoFrom(link));
+  const restoArray = await Promise.all(promiseResto);
+
+  console.log("convert to json");
+
+  //format the objects in JSON to write them in a file
+  const jsonObj = restoArray.map(resto => JSON.stringify(resto, null, 4));
+  const contentForFile = "[\n" + jsonObj.join(",\n") + "\n]";
+  console.log("saving to file");
+  fs.appendFileSync('./restaurant.json', '');
+  fs.writeFileSync('./restaurant.json', contentForFile, "utf-8");
+  console.log(restoArray.length.toString() + " restaurants found");
+  console.log("--\tScrap complete\t--");
+}
+
+scrap();
