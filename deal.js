@@ -1,129 +1,143 @@
-const cheerio = require('cheerio');
 const fetch = require('node-fetch');
 const fs = require('fs');
 
-const baseUrl = "https://www.lafourchette.com/restaurant+paris#sort=QUALITY_DESC&PROMOTION_allcheckbox=on&filters%5BPROMOTION%5D%5B50_PERCENT%5D=on&filters%5BPROMOTION%5D%5B40_PERCENT%5D=on&filters%5BPROMOTION%5D%5B30_PERCENT%5D=on&filters%5BPROMOTION%5D%5B20_PERCENT%5D=on&filters%5BPROMOTION%5D%5B25_PERCENT%5D=on&filters%5BPROMOTION%5D%5BPRESTIGE_MENU%5D=on&filters%5BPROMOTION%5D%5BOTHER%5D=on";
-const nbrPages = 79;
-
-// parameters url
-const fetchParameters = { method: 'GET',
-headers: {},
-follow: 20,
-timeout: 10000,
-compress: true,
-size: 0,
-body: null,
-agent: null
+//get the restaurants from a Json file
+const getRestoFromJson = path =>
+{
+    const content = fs.readFileSync(path, 'utf-8');
+    const arrayResto = JSON.parse(content);
+    return arrayResto;
 }
 
-//get links of each resaurants
-async function getRestoLinksFrom(url)
+//get the json from LaFourchette's api
+const getJsonFromApi = async apiUrl =>
 {
-  const resp = await fetch(url, fetchParameters);
-  const html = await resp.text();
-  const $ = await cheerio.load(html);
-  const aTag = $("div.resultItem-information");
-  //filter to get only link
-  const filteraTag = aTag.filter(d => aTag[d].name == 'a');
-  const links = [];
-  for (let i = 0; i < filteraTag.length; i++)
-  {
-    links.push("https://www.lafourchette.com" + filteraTag[i].attribs.href)
-  }
-  return links;
+    const response = await fetch(apiUrl, "utf-8");
+    const content = response.json();
+    return content;
 }
 
-//get info of a restaurant and convert in an object
-async function getRestoFrom(url)
+//get the lafourchette id's restaurant
+const getIdFrom = async resto =>
 {
-  const Resto = (name, addresse) => {
-    return {
-      "name": name,
-      "addresse": addresse,
-    }
-  }
-  let isTimeout = true;
-  
-  while(isTimeout)
-  {
-    try
+    const name = resto.name
+    const apiUrl = "https://m.lafourchette.com/api/restaurant-prediction?name=" + name;
+    let isTimeout = true;
+
+    while(isTimeout)
     {
-      const getDataFrom = selecteur => $(selecteur)[0].children[0].data;
-      const resp = await fetch(url, fetchParameters);
-      const html = await resp.text();
-      const $ = await cheerio.load(html);
-
-      let name = undefined;
-      let address = undefined;
-      let error = 0;
-
-      try
-      {
-        name = getDataFrom("h3");
-      }
-      catch (e)
-      {
-        name = null;
-        console.log("ERROR: cannot get name from " + url);
-      }
-
-      try
-      {
-        address = getDataFrom("div.resultItem-address");
-      }
-      catch (e)
-      {
-        address = null;
-        console.log("ERROR: cannot get addresse from " + url);
-      }
-      isTimeout = false;
-
-      return Resto(name, address);
+        try
+        {
+            const content = await getJsonFromApi(apiUrl);
+			//check if the CP is the same
+            const result = content.filter(r => resto.cp === r.address.postal_code && r.name.includes(resto.name));
+            isTimeout = false;
+            if (result.length > 0)
+            {
+                return result[0].id;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        catch(e)
+        {
+            if(e.errno !== "ETIMEDOUT")
+            {
+                isTimeout = false;
+                return null;
+            }
+            else
+            {
+                console.log("retry for : " + name );
+            }
+        }
     }
-    catch(e)
-    {
-      if(e.type === "request-timeout")
-      {
-        console.log("TIMEOUT for : " + url);
-      }
-      else
-      {
-        console.log(e.text);
-        console.log("this error is not a timeout\nThe querry will not be run a second time");
-        isTimeout = false;
-      }
-    }
-  }
-  
 }
 
-async function scrap()
+//get the offers of a restaurant with his id (return null if id is null)
+const getOffersFrom = async id =>
 {
-  console.log("get the url");
-  const promiseUrls = [];
-  for(let i = 1; i<= nbrPages; i++)
-  {
-    const url = baseUrl + "&page=" + i.toString();
-    promiseUrls.push(getRestoLinksFrom(url));
-  }
-  const restoLinksArrays = await Promise.all(promiseUrls);
-  const restoLinks = restoLinksArrays
-    .filter(arr => arr != undefined && arr != [])
-      .reduce((accumulator, currentArray) => accumulator.concat(currentArray), []);
-  console.log("get the data")
-  const promiseResto = restoLinks.map(link => getRestoFrom(link));
-  const restoArray = await Promise.all(promiseResto);
-
-  console.log("convert to json");
-
-  //format the objects in JSON to write them in a file
-  const jsonObj = restoArray.map(resto => JSON.stringify(resto, null, 4));
-  const contentForFile = "[\n" + jsonObj.join(",\n") + "\n]";
-  console.log("saving to file");
-  fs.appendFileSync('./work/deal.json', '');
-  fs.writeFileSync('./work/deal.json', contentForFile, "utf-8");
-  console.log(restoArray.length.toString() + " restaurants found");
-  console.log("--\tScrap complete\t--");
+    if(id != null)
+    {
+        const apiUrl = "https://m.lafourchette.com/api/restaurant/"+ id +"/sale-type";
+        const offers = await getJsonFromApi(apiUrl);
+        const filteroffers = offers.filter(offer => offer.is_special_offer);
+        return filteroffers;
+    }
+    else
+    {
+        return null;
+    }
 }
 
-scrap();
+//function to create a restaurant whith the lafourchette features given a michelin restaurant
+const LaFourchetteResto = async MichelinResto =>
+{
+    const id = await getIdFrom(MichelinResto);
+    const offers = await getOffersFrom(id);
+
+    return Object.assign(MichelinResto,
+    {
+        id: id,
+        offers: offers,
+        urlFourchette: "https://www.lafourchette.com/restaurant/name/" + id
+    });
+}
+
+//get all the lafouchette data about restaurants from a json file, 
+//and return an array of restaurants with lafourchette features beside the michelin features already here.
+//if a restaurant is not in the lafourchette data base or if it doesn't have any offer : it won't be on the list
+const getLafourchetteData = async path =>
+{
+    console.log("reading data from " + path + " ...");
+    const michelinRestoArr = getRestoFromJson(path);
+
+    let lafourchetteRestoArr = [];
+
+    console.log("launch queries");
+    let index = 0;
+    while (index < michelinRestoArr.length)
+    {
+        const promiseLafourchette = [];
+
+        //launch 10 queries
+        let nbrQueries = 35;
+
+        if(michelinRestoArr.length - index + 1 < nbrQueries) nbrQueries = michelinRestoArr.length - index;
+
+        for(let i = 0; i < nbrQueries; i++)
+        {
+            promiseLafourchette.push(LaFourchetteResto(michelinRestoArr[index]));
+            index ++;
+        }
+        
+        console.log("queries : " + index);
+
+        //resolve queries
+        const lafourchetteRestoArr10 = await Promise.all(promiseLafourchette);
+        console.log("last " + nbrQueries + " queries are resolved\n");
+        //add their result
+        lafourchetteRestoArr = lafourchetteRestoArr.concat(lafourchetteRestoArr10);
+    }
+     
+
+    console.log("filter to keep the revelant restaurants")
+    const finalList = lafourchetteRestoArr.filter(r => r.offers !== null).filter(r => r.offers.length != 0);
+
+    console.log(michelinRestoArr.length + " restaurants have been process, " + finalList.length + " have been keep");
+    console.clear();
+    console.log("\n\n---------------\n");
+    console.log("list of restaurants with deals :");
+    finalList.map(r => console.log(r.name));
+    console.log("------ Success ------");
+    return finalList;
+}
+
+getLafourchetteData("./work/restaurant.json");
+
+
+module.exports = {
+    getResto: getLafourchetteData
+}
