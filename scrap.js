@@ -96,7 +96,7 @@ async function getRestoFrom(url)
     {
       if(e.type === "request-timeout")
       {
-        console.log("TIMEOUT at url : " + url);
+        console.log("TIMEOUT for : " + url);
       }
       else
       {
