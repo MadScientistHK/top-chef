@@ -135,7 +135,7 @@ async function scrap()
   fs.appendFileSync('./work/restaurant.json', '');
   fs.writeFileSync('./work/restaurant.json', contentForFile, "utf-8");
   console.log(restoArray.length.toString() + " restaurants found");
-  console.log("--\tScrap complete\t--");
+  console.log("-----Scrap complete-----");
 }
 
 scrap();
