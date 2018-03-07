@@ -665,14 +665,14 @@
     "cp": "74140"
 },
 {
-    "name": "Maximin Hellio",
-    "addresse": "64 Rue Gambetta",
-    "cp": "14800"
-},
-{
     "name": "La Rotonde",
     "addresse": "200 avenue du Casino",
     "cp": "69890"
+},
+{
+    "name": "Maximin Hellio",
+    "addresse": "64 Rue Gambetta",
+    "cp": "14800"
 },
 {
     "name": "Greuze",
@@ -705,14 +705,14 @@
     "cp": "29250"
 },
 {
-    "name": "La Madeleine",
-    "addresse": "1 Rue Alsace-Lorraine",
-    "cp": "89100"
-},
-{
     "name": "Le Corot",
     "addresse": "55 Rue de Versailles",
     "cp": "92410"
+},
+{
+    "name": "La Madeleine",
+    "addresse": "1 Rue Alsace-Lorraine",
+    "cp": "89100"
 },
 {
     "name": "Le Relais des Moines",
@@ -1175,14 +1175,14 @@
     "cp": "75016"
 },
 {
-    "name": "La Bastide St-Antoine",
-    "addresse": "48 av. Henri-Dunant",
-    "cp": "06130"
-},
-{
     "name": "L'Atelier de Gaztelur",
     "addresse": "Chemin de Gastelhur",
     "cp": "64200"
+},
+{
+    "name": "La Bastide St-Antoine",
+    "addresse": "48 av. Henri-Dunant",
+    "cp": "06130"
 },
 {
     "name": "Ed.Em",
